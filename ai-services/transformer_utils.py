@@ -1,5 +1,4 @@
-from fastapi import FastAPI, File, Form, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Form, HTTPException
 from sentence_transformers import SentenceTransformer
 from PIL import Image
 import io
@@ -12,20 +11,19 @@ def load_model():
     return model
 
 async def embed (
+    image_data=None,
     text: str = Form(None),
-    file: UploadFile = File(None),
 ):
-    if text is None and file is None:
+    if text is None and image_data is None:
         raise HTTPException(status_code=400, detail="No text or file provided")
     
     try:
         if text:
             print("Embedding text...")
             embedding = model.encode(text)
-        elif file:
+        elif image_data:
             print("Embedding image...")
-            file_contents = await file.read()
-            image = Image.open(io.BytesIO(file_contents))
+            image = Image.open(io.BytesIO(image_data)).convert("RGB")
             embedding = model.encode(image)
         return {"embedding": embedding.tolist()}
     except Exception as e:

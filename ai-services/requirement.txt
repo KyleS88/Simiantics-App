@@ -3,5 +3,5 @@ uvicorn
 sentence-transformers[clip]
 torch
 pillow
-pyhon-multipart
+python-multipart
 redis
