@@ -35,11 +35,11 @@ async def search_by_filename(filename: str):
     results = await client.ft("idx:items").search(query)
     return results
 
-async def vector_search(query_vector):
+async def vector_search(query_vector: list):
     vector_bytes_query = np.array(query_vector, dtype=np.float32).tobytes()
     query = Query("*=>[KNN 5 @embedding $vec AS score]").sort_by("score").dialect(2)
 
-    results = await client.ft("idx:items").search(query, {"vec": vector_bytes_query})
+    results = (await client.ft("idx:items").search(query, {"vec": vector_bytes_query}))
     return results
 
 async def save_item(item_id, filename, vector, stored_name):

@@ -44,13 +44,13 @@ async def upload(file: UploadFile = File(...)):
         print("embedding...", flush=True)
         embedding = (await embed(file_data, None ))["embedding"]
         print("saving item...", flush=True)
-        await save_item(item_id, file.filename, embedding, stored_name)
+        await save_item(item_id, original_name, embedding, stored_name)
 
         path = os.path.join(UPLOAD_DIR, stored_name)
         with open(path, "wb") as buffer:
             buffer.write(file_data)
         
-        return {"message": "success", "id": item_id, "filename": file.filename}
+        return {"message": "success", "id": item_id, "filename": original_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -61,12 +61,12 @@ async def search(q: str, isFileName: bool):
         if (isFileName is True):
             result = await search_by_filename(q)
         else:
-            query_vector = await embed(None, q)
+            query_vector = (await embed(None, q))["embedding"]
             result = await vector_search(query_vector)   
         if (result is None):
             raise HTTPException(status_code=404, detail="No matching files")
         output = []
-        for doc in result:
+        for doc in result.docs:
             if (1-float(doc.score) < .8):
                 continue
             output.append({

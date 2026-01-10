@@ -4,11 +4,11 @@ import { Carousel } from "./Components/Carousel"
 import axios from 'axios';
 
 const App = () => {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]);
-  const [isFile, setIsFile] = useState(false);
-  const [err, setErr] = useState("");
+  const [query, setQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [isFile, setIsFile] = useState<boolean>(false);
+  const [err, setErr] = useState<string>("");
 
   const handleFileCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
       setIsFile(e.target.checked);
@@ -16,9 +16,13 @@ const App = () => {
 
   const handleSearch = async () => {
     try {
+      if (!query) {
+        setErr("Please enter a search query");
+        return;
+      }
       const data = await searchImages(query, isFile);
       console.log(data)
-      setResults(data.results);
+      setSearchResults(data.results);
       setImageUrls(data.images)
     } catch (err) {
       if (axios.isAxiosError(err))
@@ -38,6 +42,7 @@ const App = () => {
   }
   return (
   <>
+  {imageUrls.length > 0 && <p>Images created {imageUrls.length}</p>}
     {err && <p>{err}</p>}
     <h1 style={{display:'flex', justifyContent: 'center'}}>Image Matching Engine</h1>
     <div className="image-upload-div">
@@ -68,11 +73,7 @@ const App = () => {
         <button onClick={handleSearch}>Search</button>
     </div>
     <div className='imageDisplay'>
-        {
-          typeof results === "string"? 
-          <p>results</p>: 
-          <Carousel images={imageUrls}/>
-        }
+      <Carousel images={imageUrls}/>
     </div>
   </>
   )

@@ -7,7 +7,7 @@ model = None
 def load_model():
     global model
     if (model is None):
-        model = SentenceTransformer('clip-ViT-B-32')
+        model = SentenceTransformer('clip-ViT-B-32', device='cpu')
     return model
 
 async def embed (
