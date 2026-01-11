@@ -23,7 +23,7 @@ export const uploadImage = async (file: File | undefined) => {
         const formData = new FormData();
         formData.append("file", file);
         console.log("calling api")
-        const response = await axios.post(`${apiURL}/upload`, formData);
+            const response = await axios.post(`${apiURL}/upload`, formData);
         console.log("api complete")
         return response.data;
     } catch (err) {

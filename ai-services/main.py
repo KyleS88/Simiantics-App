@@ -38,12 +38,9 @@ async def upload(file: UploadFile = File(...)):
         original_name = os.path.basename(file.filename)
         ext = os.path.splitext(original_name)[1].lower()    
         stored_name = f"{uuid.uuid4()}{ext}"
-        print("reading file", flush=True)
         file_data = await file.read()
         item_id = str(uuid.uuid4())
-        print("embedding...", flush=True)
         embedding = (await embed(file_data, None ))["embedding"]
-        print("saving item...", flush=True)
         await save_item(item_id, original_name, embedding, stored_name)
 
         path = os.path.join(UPLOAD_DIR, stored_name)
@@ -51,12 +48,15 @@ async def upload(file: UploadFile = File(...)):
             buffer.write(file_data)
         
         return {"message": "success", "id": item_id, "filename": original_name}
+    except HTTPException as he:
+        raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.get("/search")
 async def search(q: str, isFileName: bool):
     try:
+        print("returning results")
         result = None
         if (isFileName is True):
             result = await search_by_filename(q)
@@ -67,7 +67,7 @@ async def search(q: str, isFileName: bool):
             raise HTTPException(status_code=404, detail="No matching files")
         output = []
         for doc in result.docs:
-            if (1-float(doc.score) < .8):
+            if (1-float(doc.score) < .22):
                 continue
             output.append({
                 "id": doc.id,

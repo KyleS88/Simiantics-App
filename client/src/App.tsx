@@ -25,9 +25,8 @@ const App = () => {
       setSearchResults(data.results);
       setImageUrls(data.images)
     } catch (err) {
-      if (axios.isAxiosError(err))
-        setErr(err.message);
-      setErr(`An unexpected error has occured please refresh the page: ${err}`);
+      err instanceof Error? setErr(err.message):
+        setErr(`An unexpected error has occured please refresh the page: ${err}`);
     }
   }
 
@@ -35,14 +34,12 @@ const App = () => {
     try {
       await uploadImage(e.target.files?.[0]);
     } catch (err) {
-      if (axios.isAxiosError(err))
-        setErr(err.message);
-      setErr(`An unexpected error has occured please refresh the page: ${err}`);
+      err instanceof Error? setErr(err.message):
+        setErr(`An unexpected error has occured please refresh the page: ${err}`);
     }
   }
   return (
   <>
-  {imageUrls.length > 0 && <p>Images created {imageUrls.length}</p>}
     {err && <p>{err}</p>}
     <h1 style={{display:'flex', justifyContent: 'center'}}>Image Matching Engine</h1>
     <div className="image-upload-div">

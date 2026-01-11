@@ -35,15 +35,20 @@ async def search_by_filename(filename: str):
     results = await client.ft("idx:items").search(query)
     return results
 
-async def vector_search(query_vector: list):
+async def vector_search(query_vector: list, num_of_neighbors: int = 5):
     vector_bytes_query = np.array(query_vector, dtype=np.float32).tobytes()
-    query = Query("*=>[KNN 5 @embedding $vec AS score]").sort_by("score").dialect(2)
+    query = Query("*=>[KNN $num_of_neighbors @embedding $vec AS score]").sort_by("score").dialect(2)
 
-    results = (await client.ft("idx:items").search(query, {"vec": vector_bytes_query}))
+    results = (await client.ft("idx:items").search(query, {"vec": vector_bytes_query, "num_of_neighbors": num_of_neighbors}))
     return results
 
 async def save_item(item_id, filename, vector, stored_name):
     try:
+        # check if item already exists
+        search_results = (await vector_search(vector, 1)).docs
+        if (len(search_results) and float(search_results[0].score) < 0.01):
+            raise HTTPException(status_code=409, detail="Item already exists")
+        
         vector_bytes = np.array(vector, dtype=np.float32).tobytes()
         print(f"{item_id}:{filename}:{vector}:{stored_name}", flush=True)
         await client.hset(
@@ -56,6 +61,8 @@ async def save_item(item_id, filename, vector, stored_name):
             }
         )
         print(f"Saved {filename} to Redis as item:{item_id}", flush=True)
+    except HTTPException as he:
+        raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

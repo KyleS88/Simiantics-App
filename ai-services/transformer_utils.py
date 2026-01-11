@@ -19,12 +19,13 @@ async def embed (
     
     try:
         if text:
-            print("Embedding text...")
+            print("Embedding textd...")
             embedding = model.encode(text)
         elif image_data:
             print("Embedding image...")
             image = Image.open(io.BytesIO(image_data)).convert("RGB")
             embedding = model.encode(image)
+        print("Image embedded successfully")
         return {"embedding": embedding.tolist()}
     except Exception as e:
         print(f"Error {e}")

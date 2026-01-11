@@ -1,3 +1,4 @@
 /node_modules
 /./ai-services/venv
 /.env
+/./ai-services/__pycache__
